@@ -104,6 +104,7 @@ public class FileUtil {
             List<BufferedReader> brList = FileUtil.generateBufferReaderList(filePath,fileIndexPrefix,fileStartIndex,fileStartIndex.get()+chunkNumber,fileNumber);
             List<Product> productList= FileUtil.readFirstLineFromEachFile(brList,compareIndex);
             if(productList.isEmpty()){
+                removeLineFromFile(filePath+"_chunk_"+smallestProduct.getIndexForFileName(),maxLineRead,smallestProduct.getLine());
                 return smallestProduct;
             }
             Collections.sort(productList, new Product(compareIndex));
@@ -151,7 +152,30 @@ public class FileUtil {
     }
 
 
-    private static void removeJsonItemFromFile(String filePath, int maxLineRead, Product exceptionProduct) throws IOException {
+    public static void removeLineFromFile(String filePath, int maxLineRead, String targetLine) throws IOException {
+        String newFilePath=filePath+"_new";
+        BufferedReader br=new BufferedReader(new FileReader(filePath));
+        BufferedWriter bw=new BufferedWriter(new FileWriter(newFilePath));
+        int linesNumber=getNumberOfLinesFromFile(filePath);
+        for(int i=0;i<linesNumber;){
+            for(int j=0;j<maxLineRead && i<linesNumber ;j++,i++){
+                String line=br.readLine();
+                if(line!=null && !line.isEmpty() && targetLine.equals(line)){
+                    continue;
+                }
+                bw.append(line+"\n");
+            }
+        }
+        System.gc();
+        bw.close();
+        br.close();
+        new File(new File(filePath).getCanonicalPath()).delete();
+        new File(newFilePath).renameTo(new File(filePath));
+    }
+
+
+
+    public static void removeJsonItemFromFile(String filePath, int maxLineRead, Product exceptionProduct) throws IOException {
         String newFilePath=filePath+"_new";
         BufferedReader br=new BufferedReader(new FileReader(filePath));
         BufferedWriter bw=new BufferedWriter(new FileWriter(newFilePath));

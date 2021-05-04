@@ -109,9 +109,11 @@ public class ExternalMergeSortService {
     private void mergeFiles(int numOfFiles, String columnsLine,int numberOfLines,String filePath) throws IOException {
         BufferedWriter bwFinal=new BufferedWriter(new FileWriter(filePath+"_sorted.csv"));
         Product smallestProduct= FileUtil.fetchSmallestLine(numberOfLines,maxLineRead,filePath,compareIndex);
+        bwFinal.append(smallestProduct+"\n");
+
         while (true){
             int indexForFileName=smallestProduct.getIndexForFileName();
-            bwFinal.append(smallestProduct+"\n");
+
 
 
 
@@ -126,7 +128,7 @@ public class ExternalMergeSortService {
 //            readLineAttemptFromOneOfTheFilesExceptIndexOne(listOfBufferedReader,listOfLinesfromAllFiles,indexForFileName);
 
         }
-        bwFinal.close();
+       // bwFinal.close();
     }
 
 
