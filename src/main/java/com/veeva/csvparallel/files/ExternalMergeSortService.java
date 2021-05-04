@@ -103,6 +103,7 @@ public class ExternalMergeSortService {
 
 
 
+
     //  THE METHOD READ LINES FROM ALL CHUNK TEMP FILES AND SORT THEM AND CREATE FINAL CSV FILE
     private void mergeFiles(int numOfFiles, String columnsLine,int numberOfLines,String filePath) throws IOException {
         BufferedWriter bwFinal=new BufferedWriter(new FileWriter(filePath+"_sorted.csv"));
@@ -110,6 +111,9 @@ public class ExternalMergeSortService {
         while (true){
             int indexForFileName=smallestProduct.getIndexForFileName();
             bwFinal.append(smallestProduct+"\n");
+
+
+
 
 
 
