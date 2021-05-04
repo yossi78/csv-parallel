@@ -1,0 +1,101 @@
+﻿ID,Name,Department,Description,Country,City,Code,Network Connectivity,Product Manager,Improvments
+1,table,Furniture,computer table,Israel,Jerusalem,30000,wifi,John Smith,Matirial
+2,phone,communication,bezeq phone,China,beijing,29999,lan,Avrum Tolmas,Design
+3,air conditioner,infrastructure,electra air conditioner,United States,Washington DC,29998,cellular 3G,Sara Gates,Heat
+4,hat,textile,summer hat,england,london,29997,cellular 4G,bill roman,cold
+5,key,accessories,main door key,Jurdan,Aman,29996,cellular 5G,Philip Goakel,Stress
+6,lamp,accessories,bedroom lamp,Lebanon,Beyrouth,29995,lan,danny keinan,flexibility
+7,ball,toys,baby ball,Canada,Ottawa,29994,cellular 4G,Efi Vaknin,Acid protect
+8,window,Furniture,bathroom windows,Saudi Arabia,Riad,29993,wifi,Sami Kashbi,Frame
+9,pen,office,parker pen,United Arab Emirates,Abu Dabi,29992,cellular 4G,Igal Pinchasi,base
+10,eraser,office,isimu eraser,Iraq,Bagdad,29991,mesh,Yossi Arviv,Holders
+11,mouse,technology,lazer mouse,Iran,Teheran,29990,mesh,Tomer Zaid,Adapters
+12,pencil,office,h3 pencil,Germany,München,29989,wifi,Moshe Masika,Connectivity Points
+13,keyboard,technology,wireless keyboard,Australia,Caberra,29988,cellular 5G,Mirit Sasi,Stress
+14,sugar,supermarket,brown sugar,Austria,Wien,29987,cellular 4G,yaniv dabush,flexibility
+15,salt,supermarket,himalaya pink salt,Switzerland,Bern,29986,mesh,Challes yukan,Acid protect
+16,chair,Furniture,black wood chair,Denmark,Copenhagen,29985,wifi,Michael Horovitz,Frame
+17,door,Furniture,pladelet door,greece,athens,29984,mesh,Natanel mikunu,base
+18,track,traffic,volvo track,cyprus,nicosia ,29983,mesh,zveta yulandi,Holders
+19,car,traffic,suzuki car,Jurdan,Aman,29982,cellular 4G,Rebbaca Siman tov,Adapters
+20,shirt,textile,smooth blue shirt,Mexico,Mexico city,29981,wifi,Tami affriate,Connectivity Points
+21,glassdoor,Furniture,pandor glassdoor,Yemen,Zanaa,29980,mesh,Avi james,Stress
+22,jar,accessories,water jar,India,New delhi,29979,cellular 4G,Zeavik Gal,Heat
+23,marker,office,two layer marker,Thailand,Bangkok,29978,wifi,Yossi Levi,cold
+24,screen,technology,27 inch screen,Poland,Warszawa,29977,mesh,Daniel berry,Stress
+25,mother board,technology,intel mother board,Jurdan,Aman,29976,cellular 4G,Sima galkov,flexibility
+26,can,supermarket,coca cola can,Rumania,bucuresti,29975,wifi,Ami Guatta,Connectivity Points
+27,ink,office,Hewlett-Packard ink,Congo,Brzzaville,29974,cellular 4G,Peni Omega,Holders
+28,printer,technology,x3rox printer,Ukraine,Keyaav,29973,cellular 5G,Ford Ellenon,Frame
+29,router,communication,alcatel router,New Zealand,Wellington,29972,wifi,danny keinan,base
+30,lan cable,communication,cellcom lan cable,Iceland,Reykjavik,29971,wifi,Michael Horovitz,Holders
+31,brench,bouy,bubu,bpopo,bgsd,29970,lan,buini,bnbnb
+32,KKK-1,JJJ-1,SSS-1,ccc-1,eee-1,29971,hhh-1,ppp-1,fff-1
+33,KKK-2,JJJ-2,SSS-2,ccc-2,eee-2,29972,hhh-2,ppp-2,fff-2
+34,KKK-3,JJJ-3,SSS-3,ccc-3,eee-3,29973,hhh-3,ppp-3,fff-3
+35,KKK-4,JJJ-4,SSS-4,ccc-4,eee-4,29974,hhh-4,ppp-4,fff-4
+36,KKK-5,JJJ-5,SSS-5,ccc-5,eee-5,29975,hhh-5,ppp-5,fff-5
+37,KKK-6,JJJ-6,SSS-6,ccc-6,eee-6,29976,hhh-6,ppp-6,fff-6
+38,KKK-7,JJJ-7,SSS-7,ccc-7,eee-7,29977,hhh-7,ppp-7,fff-7
+39,KKK-8,JJJ-8,SSS-8,ccc-8,eee-8,29978,hhh-8,ppp-8,fff-8
+40,KKK-9,JJJ-9,SSS-9,ccc-9,eee-9,29979,hhh-9,ppp-9,fff-9
+41,KKK-10,JJJ-10,SSS-10,ccc-10,eee-10,29980,hhh-10,ppp-10,fff-10
+42,KKK-11,JJJ-11,SSS-11,ccc-11,eee-11,29981,hhh-11,ppp-11,fff-11
+43,KKK-12,JJJ-12,SSS-12,ccc-12,eee-12,29982,hhh-12,ppp-12,fff-12
+44,KKK-13,JJJ-13,SSS-13,ccc-13,eee-13,29983,hhh-13,ppp-13,fff-13
+45,KKK-14,JJJ-14,SSS-14,ccc-14,eee-14,29984,hhh-14,ppp-14,fff-14
+46,KKK-15,JJJ-15,SSS-15,ccc-15,eee-15,29985,hhh-15,ppp-15,fff-15
+47,KKK-16,JJJ-16,SSS-16,ccc-16,eee-16,29986,hhh-16,ppp-16,fff-16
+48,KKK-17,JJJ-17,SSS-17,ccc-17,eee-17,29987,hhh-17,ppp-17,fff-17
+49,KKK-18,JJJ-18,SSS-18,ccc-18,eee-18,29988,hhh-18,ppp-18,fff-18
+50,KKK-19,JJJ-19,SSS-19,ccc-19,eee-19,29989,hhh-19,ppp-19,fff-19
+51,KKK-20,JJJ-20,SSS-20,ccc-20,eee-20,29990,hhh-20,ppp-20,fff-20
+52,KKK-21,JJJ-21,SSS-21,ccc-21,eee-21,29991,hhh-21,ppp-21,fff-21
+53,KKK-22,JJJ-22,SSS-22,ccc-22,eee-22,29992,hhh-22,ppp-22,fff-22
+54,KKK-23,JJJ-23,SSS-23,ccc-23,eee-23,29993,hhh-23,ppp-23,fff-23
+55,KKK-24,JJJ-24,SSS-24,ccc-24,eee-24,29994,hhh-24,ppp-24,fff-24
+56,KKK-25,JJJ-25,SSS-25,ccc-25,eee-25,29995,hhh-25,ppp-25,fff-25
+57,KKK-26,JJJ-26,SSS-26,ccc-26,eee-26,29996,hhh-26,ppp-26,fff-26
+58,KKK-27,JJJ-27,SSS-27,ccc-27,eee-27,29997,hhh-27,ppp-27,fff-27
+59,KKK-28,JJJ-28,SSS-28,ccc-28,eee-28,29998,hhh-28,ppp-28,fff-28
+60,KKK-29,JJJ-29,SSS-29,ccc-29,eee-29,29999,hhh-29,ppp-29,fff-29
+61,KKK-30,JJJ-30,SSS-30,ccc-30,eee-30,30000,hhh-30,ppp-30,fff-30
+62,KKK-31,JJJ-31,SSS-31,ccc-31,eee-31,30001,hhh-31,ppp-31,fff-31
+63,KKK-32,JJJ-32,SSS-32,ccc-32,eee-32,30002,hhh-32,ppp-32,fff-32
+64,KKK-33,JJJ-33,SSS-33,ccc-33,eee-33,30003,hhh-33,ppp-33,fff-33
+65,KKK-34,JJJ-34,SSS-34,ccc-34,eee-34,30004,hhh-34,ppp-34,fff-34
+66,KKK-35,JJJ-35,SSS-35,ccc-35,eee-35,30005,hhh-35,ppp-35,fff-35
+67,KKK-36,JJJ-36,SSS-36,ccc-36,eee-36,30006,hhh-36,ppp-36,fff-36
+68,KKK-37,JJJ-37,SSS-37,ccc-37,eee-37,30007,hhh-37,ppp-37,fff-37
+69,KKK-38,JJJ-38,SSS-38,ccc-38,eee-38,30008,hhh-38,ppp-38,fff-38
+70,KKK-39,JJJ-39,SSS-39,ccc-39,eee-39,30009,hhh-39,ppp-39,fff-39
+71,KKK-40,JJJ-40,SSS-40,ccc-40,eee-40,30010,hhh-40,ppp-40,fff-40
+72,KKK-41,JJJ-41,SSS-41,ccc-41,eee-41,30011,hhh-41,ppp-41,fff-41
+73,kkk-42,JJJ-42,SSS-42,ccc-42,eee-42,30012,hhh-42,ppp-42,fff-42
+74,kkk-43,JJJ-43,SSS-43,ccc-43,eee-43,30013,hhh-43,ppp-43,fff-43
+75,KKK-44,JJJ-44,SSS-44,ccc-44,eee-44,30014,hhh-44,ppp-44,fff-44
+76,KKK-45,JJJ-45,SSS-45,ccc-45,eee-45,30015,hhh-45,ppp-45,fff-45
+77,KKK-46,JJJ-46,SSS-46,ccc-46,eee-46,30016,hhh-46,ppp-46,fff-46
+78,KKK-47,JJJ-47,SSS-47,ccc-47,eee-47,30017,hhh-47,ppp-47,fff-47
+79,KKK-48,JJJ-48,SSS-48,ccc-48,eee-48,30018,hhh-48,ppp-48,fff-48
+80,KKK-49,JJJ-49,SSS-49,ccc-49,eee-49,30019,hhh-49,ppp-49,fff-49
+81,KKK-50,JJJ-50,SSS-50,ccc-50,eee-50,30020,hhh-50,ppp-50,fff-50
+82,ZZZ-1,JJJ-51,SSS-51,ccc-51,eee-51,30021,hhh-51,ppp-51,fff-51
+83,ZZZ-2,JJJ-52,SSS-52,ccc-52,eee-52,30022,hhh-52,ppp-52,fff-52
+84,ZZZ-3,JJJ-53,SSS-53,ccc-53,eee-53,30023,hhh-53,ppp-53,fff-53
+85,zzz-4,JJJ-54,SSS-54,ccc-54,eee-54,30024,hhh-54,ppp-54,fff-54
+86,zzz-5,JJJ-55,SSS-55,ccc-55,eee-55,30025,hhh-55,ppp-55,fff-55
+87,zzz-6,JJJ-56,SSS-56,ccc-56,eee-56,30026,hhh-56,ppp-56,fff-56
+88,ZZZ-7,JJJ-57,SSS-57,ccc-57,eee-57,30027,hhh-57,ppp-57,fff-57
+89,ZZZ-8,JJJ-58,SSS-58,ccc-58,eee-58,30028,hhh-58,ppp-58,fff-58
+90,ZZZ-9,JJJ-59,SSS-59,ccc-59,eee-59,30029,hhh-59,ppp-59,fff-59
+91,DDD-1,PUPU-1,DUDU-1,KUKI-1,FURI-1,30030,GIMI-1,WINI-1,VVV-1
+92,DDD-2,PUPU-2,DUDU-2,KUKI-2,FURI-2,30031,GIMI-2,WINI-2,VVV-2
+93,DDD-3,PUPU-3,DUDU-3,KUKI-3,FURI-3,30032,GIMI-3,WINI-3,VVV-3
+94,DDD-4,PUPU-4,DUDU-4,KUKI-4,FURI-4,30033,GIMI-4,WINI-4,VVV-4
+95,DDD-5,PUPU-5,DUDU-5,KUKI-5,FURI-5,30034,GIMI-5,WINI-5,VVV-5
+96,DDD-6,PUPU-6,DUDU-6,KUKI-6,FURI-6,30035,GIMI-6,WINI-6,VVV-6
+97,DDD-7,PUPU-7,DUDU-7,KUKI-7,FURI-7,30036,GIMI-7,WINI-7,VVV-7
+98,DDD-8,PUPU-8,DUDU-8,KUKI-8,FURI-8,30037,GIMI-8,WINI-8,VVV-8
+99,DDD-9,PUPU-9,DUDU-9,KUKI-9,FURI-9,30038,GIMI-9,WINI-9,VVV-9
+100,DDD-10,PUPU-10,DUDU-10,KUKI-10,FURI-10,30039,GIMI-10,WINI-10,VVV-10
