@@ -3,6 +3,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.veeva.csvparallel.dao.Product;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileDeleteStrategy;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -93,24 +94,26 @@ public class FileUtil {
     public FileUtil() {
     }
 
-    public static Product fetchSmallestLine(int numberOfLines, int maxLineRead, String filePath, int compareIndex) throws IOException {
-        String fileIndexPrefix="_chunk_";
-        String cacheFilePath=filePath+"_cache";
+    public static Product fetchSmallestLineAndRemoveIt(int numberOfLines, int maxLineRead, String filePath, int compareIndex) throws IOException, InterruptedException {
+        String FILE_INDEX_FREFIX="_chunk_";
+        String CHUNK_FILE_PATH=filePath+"_chunk_";
+        String CACHE_FILE_PATH=filePath+"_cache";
         AtomicInteger fileStartIndex=new AtomicInteger(0);
         int fileNumber=numberOfLines/maxLineRead;
         int chunkNumber=fileNumber<=maxLineRead ? fileNumber : maxLineRead;
         Product smallestProduct=null;
         while(true) {
-            List<BufferedReader> brList = FileUtil.generateBufferReaderList(filePath,fileIndexPrefix,fileStartIndex,fileStartIndex.get()+chunkNumber,fileNumber);
-            List<Product> productList= FileUtil.readFirstLineFromEachFile(brList,compareIndex);
+            List<BufferedReader> brList = FileUtil.generateBufferReaderList(filePath,FILE_INDEX_FREFIX,fileStartIndex,fileStartIndex.get()+chunkNumber,fileNumber);
+            List<Product> productList= FileUtil.readFirstLineFromEachFileAndRemoveIt(brList,compareIndex,maxLineRead,CHUNK_FILE_PATH);
             if(productList.isEmpty()){
                 removeLineFromFile(filePath+"_chunk_"+smallestProduct.getIndexForFileName(),maxLineRead,smallestProduct.getLine());
+                brList.stream().forEach(c-> {try {c.close();} catch (IOException e) {}});
                 return smallestProduct;
             }
             Collections.sort(productList, new Product(compareIndex));
-            writeAdditionalListToFileAsJsons(cacheFilePath,productList,maxLineRead);
-            Product smallestCacheProduct= FileUtil.fetchSmallestLineFromCacheFile(cacheFilePath,maxLineRead,compareIndex);
-            smallestProduct=compareSmallestProductVsSmallestProductFromCache(smallestProduct,smallestCacheProduct,cacheFilePath,maxLineRead,compareIndex);
+            writeAdditionalListToFileAsJsons(CACHE_FILE_PATH,productList,maxLineRead);
+            Product smallestCacheProduct= FileUtil.fetchSmallestLineFromCacheFile(CACHE_FILE_PATH,maxLineRead,compareIndex);
+            smallestProduct=compareSmallestProductVsSmallestProductFromCache(smallestProduct,smallestCacheProduct,CACHE_FILE_PATH,maxLineRead,compareIndex);
         }
 
     }
@@ -152,7 +155,32 @@ public class FileUtil {
     }
 
 
-    public static void removeLineFromFile(String filePath, int maxLineRead, String targetLine) throws IOException {
+
+    public static void removeLinesFromFile(String filePath, int maxLineRead, List<String> targetLines) throws IOException, InterruptedException {
+        String newFilePath=filePath+"_new";
+        BufferedReader br=new BufferedReader(new FileReader(filePath));
+        BufferedWriter bw=new BufferedWriter(new FileWriter(newFilePath));
+        int linesNumber=getNumberOfLinesFromFile(filePath);
+        for(int i=0;i<linesNumber;){
+            for(int j=0;j<maxLineRead && i<linesNumber ;j++,i++){
+                String line=br.readLine();
+                if(line!=null && !line.isEmpty() && targetLines.contains(line)){
+                    continue;
+                }
+                bw.append(line+"\n");
+            }
+        }
+        System.gc();
+        bw.close();
+        br.close();
+        File olfFile= new File(new File(filePath).getCanonicalPath());
+        olfFile.delete();
+        File newFile=new File(newFilePath);
+        newFile.renameTo(new File(filePath));
+    }
+
+
+    public static void removeLineFromFile(String filePath, int maxLineRead, String targetLine) throws IOException, InterruptedException {
         String newFilePath=filePath+"_new";
         BufferedReader br=new BufferedReader(new FileReader(filePath));
         BufferedWriter bw=new BufferedWriter(new FileWriter(newFilePath));
@@ -167,10 +195,14 @@ public class FileUtil {
             }
         }
         System.gc();
-        bw.close();
         br.close();
-        new File(new File(filePath).getCanonicalPath()).delete();
-        new File(newFilePath).renameTo(new File(filePath));
+        bw.close();
+        File oldFile= new File(filePath);
+        Files.delete(Paths.get(filePath));
+        oldFile.delete();
+        File newFile=new File(newFilePath);
+        newFile.renameTo(new File(filePath));
+
     }
 
 
@@ -195,6 +227,20 @@ public class FileUtil {
         br.close();
         new File(new File(filePath).getCanonicalPath()).delete();
         new File(newFilePath).renameTo(new File(filePath));
+    }
+
+
+    private static List<Product> readFirstLineFromEachFileAndRemoveIt(List<BufferedReader> brList,int compareIndex,int maxLineRead,String filePath) throws IOException, InterruptedException {
+        List<Product> productList=new ArrayList<>();
+        String line=null;
+        for(int i=0;i<brList.size();i++){
+            line=brList.get(i).readLine();
+            Product product=new Product(line,compareIndex,i);
+            productList.add(product);
+            brList.get(i).close();
+            removeLineFromFile(filePath+product.getIndexForFileName(),maxLineRead,product.getLine());
+        }
+        return productList;
     }
 
 
@@ -252,7 +298,7 @@ public class FileUtil {
 
 
 
-    //xxxx
+
     public static void writeAdditionalListToFileAsJsons(String filePath, List<Product> productList, int maxLineRead) throws IOException {
         if(writeToFileAsJsonsForTheFirstTime(filePath,productList)){
             return;
@@ -347,4 +393,80 @@ public class FileUtil {
     }
 
 
+    public static Product readLine(String filePath,int fileIndex,int maxLineRead,int compareIndex) throws IOException, InterruptedException {
+        BufferedReader br=new BufferedReader(new FileReader(filePath));
+        String line= null;
+        line = br.readLine();
+        if(line==null){
+            return null;
+        }
+        br.close();
+        return new Product(line,compareIndex,fileIndex);
+    }
+
+    public static Product readLineAndRemoveIt(String filePath,int fileIndex,int maxLineRead,int compareIndex) throws IOException, InterruptedException {
+        BufferedReader br=new BufferedReader(new FileReader(filePath));
+        String line= null;
+        line = br.readLine();
+        if(line==null){
+            return null;
+        }
+        br.close();
+        removeLineFromFile(filePath,maxLineRead,line);
+        return new Product(line,compareIndex,fileIndex);
+    }
+
+    public static Product readLineFromAnyFileExceptParamOneAndRemoveIt(String filePath, int fileIndex, int numOfFiles, int maxLineRead,int compareIndex) throws IOException {
+        BufferedReader br=null;
+        String line=null;
+        for(int i=0;i<numOfFiles;i++){
+            String currentFilePath=filePath+i;
+            try {
+                br=new BufferedReader(new FileReader(currentFilePath));
+                line= br.readLine();
+                if(line==null){
+                    br.close();
+                    continue;
+                }
+                if(line.isEmpty()){
+                    i--;
+                    br.close();
+                    continue;
+                }
+                removeLineFromFile(currentFilePath,maxLineRead,line);
+                br.close();
+                return new Product(line,compareIndex,fileIndex);
+            } catch (IOException | InterruptedException e) {
+                br.close();
+                continue;
+            }
+        }
+        br.close();
+        return null;
+    }
+
+    public static Product readSmallestJsonFromFileAndRemoveIt(String filePath, int maxLineRead) throws IOException, InterruptedException {
+        int linesNumber=getNumberOfLinesFromFile(filePath);
+        BufferedReader br=new BufferedReader(new FileReader(filePath));
+        Product smallest=null;
+        String line=null;
+        for(int i=0;i<linesNumber;i++){
+            line=br.readLine();
+            if(line!=null){
+                Product current=(Product) stringToObject(line,Product.class);
+                smallest= (Product) findSmallestItem(smallest,current);
+            }
+        }
+        br.close();
+        removeJsonItemFromFile(filePath,maxLineRead,smallest);
+        return smallest;
+    }
+
+
+
+
 }
+
+
+
+

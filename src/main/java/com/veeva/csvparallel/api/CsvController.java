@@ -1,5 +1,7 @@
 package com.veeva.csvparallel.api;
+import com.veeva.csvparallel.dao.Product;
 import com.veeva.csvparallel.dto.CsvSortColumnRequest;
+import com.veeva.csvparallel.files.FileUtil;
 import com.veeva.csvparallel.services.CsvService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,30 +46,6 @@ public class CsvController {
         }
         return ResponseEntity.ok().build();
     }
-
-
-//
-//
-//    public static void main(String[] args) throws IOException {
-//        BufferedWriter bw=new BufferedWriter(new FileWriter("src\\main\\resources\\AAA.csv_cache"));
-//        Human human1=new Human("aaa",1);
-//        bw.append(human1.toString()+"\n");
-//        bw.close();
-//
-//
-//        BufferedWriter bwCache=new BufferedWriter(new FileWriter("src\\main\\resources\\AAA.csv_cache_new"));
-//        bwCache.append(human1+"\n");
-//        Human human2=new Human("bbb",2);
-//        bwCache.append(human2.toString()+"\n");
-//        bwCache.close();
-//
-//
-//        new File("src\\main\\resources\\AAA.csv_cache").delete();
-//        new File("src\\main\\resources\\AAA.csv_cache_new").renameTo(new File("src\\main\\resources\\AAA.csv_cache"));
-//
-//        System.out.println("s");
-//
-//    }
 
 
 

@@ -21,7 +21,7 @@ public class CsvService {
         this.externalMergeSortService = externalMergeSortService;
     }
 
-    public void sortByColumn(CsvSortColumnRequest request) throws IOException {
+    public void sortByColumn(CsvSortColumnRequest request) throws IOException, InterruptedException {
         externalMergeSortService.setFilePath(request.getFilePath());
         externalMergeSortService.setCompareIndex(request.getCompareIndex());
         externalMergeSortService.setMaxLineRead(request.getMaxLineRead());

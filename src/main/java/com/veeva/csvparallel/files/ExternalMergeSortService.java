@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import static com.veeva.csvparallel.files.FileUtil.readChunkOfLineSortAndWriteItToTempFile;
 
 
-
 @Slf4j
 @Data
 @Service
@@ -23,6 +22,7 @@ public class ExternalMergeSortService {
     private String filePath;
     private int compareIndex;
     private int maxLineRead;
+    private String CHUNK = "_chunk_";
 
 
     public ExternalMergeSortService(String filePath, int compareIndex, int maxLineRead) {
@@ -36,13 +36,14 @@ public class ExternalMergeSortService {
      * This method will be responsible for reading file, and creating some sorted temporary files from that.
      * After that this will merge all this file in out put files
      */
-    public void externalMerge() throws IOException {
+    public void externalMerge() throws IOException, InterruptedException {
         AtomicInteger fileIndex = new AtomicInteger(-1);
         BufferedReader br =new BufferedReader(new FileReader(filePath));
         String columnsLine=br.readLine();
         Integer numberOfLines= FileUtil.getNumberOfLinesFromFile(filePath);
         IntStream fileIndexStream=IntStream.range(0,numberOfLines/maxLineRead);
-        fileIndexStream.parallel().forEach(c->{
+//        fileIndexStream.parallel().forEach(c->{
+        fileIndexStream.forEach(c->{
             try {
                 readChunkOfLineSortAndWriteItToTempFile(br,fileIndex,maxLineRead,compareIndex,filePath);
             } catch (IOException | InterruptedException e) {
@@ -77,7 +78,7 @@ public class ExternalMergeSortService {
 
 
     private String generateFileName(int index) {
-        return this.filePath + "_" + "chunk" + "_"
+        return this.filePath + CHUNK
                 + index;
     }
 
@@ -106,29 +107,35 @@ public class ExternalMergeSortService {
 
 
     //  THE METHOD READ LINES FROM ALL CHUNK TEMP FILES AND SORT THEM AND CREATE FINAL CSV FILE
-    private void mergeFiles(int numOfFiles, String columnsLine,int numberOfLines,String filePath) throws IOException {
+    private void mergeFiles(int numOfFiles, String columnsLine,int numberOfLines,String filePath) throws IOException, InterruptedException {
         BufferedWriter bwFinal=new BufferedWriter(new FileWriter(filePath+"_sorted.csv"));
-        Product smallestProduct= FileUtil.fetchSmallestLine(numberOfLines,maxLineRead,filePath,compareIndex);
+        Product smallestProduct= FileUtil.fetchSmallestLineAndRemoveIt(numberOfLines,maxLineRead,filePath,compareIndex);
         bwFinal.append(smallestProduct+"\n");
-
         while (true){
-            int indexForFileName=smallestProduct.getIndexForFileName();
-
-
-
-
-
-
-
-
-//            Boolean isReadLineSucceed = readNextLineComingAfterCurrentOne(indexForFileName,listOfLinesfromAllFiles,indexForFileName);
-//            if(isReadLineSucceed){
-//                continue;
-//            }
-//            readLineAttemptFromOneOfTheFilesExceptIndexOne(listOfBufferedReader,listOfLinesfromAllFiles,indexForFileName);
-
+            int fileIndex=smallestProduct.getIndexForFileName();
+            readNextLineComingAfterCurrentOneAndRemoveIt(filePath,fileIndex,numOfFiles,numberOfLines);
+            smallestProduct=FileUtil.readSmallestJsonFromFileAndRemoveIt(filePath+"_cache",maxLineRead);
+            if(smallestProduct==null){
+                break;
+            }
+            bwFinal.append(smallestProduct+"\n");
         }
-       // bwFinal.close();
+        bwFinal.close();
+    }
+
+    private Product findSmallestFromChunkVsCache(String filePath, int fileIndex, int numOfFiles, int numberOfLines) throws IOException, InterruptedException {
+        Product smallestFromChunk= readNextLineComingAfterCurrentOne(filePath,fileIndex,numOfFiles,numberOfLines);
+        return null;
+    }
+
+
+    private Product readNextLineComingAfterCurrentOne(String filePath, int fileIndex, int numOfFiles, int numberOfLines) throws IOException, InterruptedException {
+        Product product=null;
+        product = FileUtil.readLineAndRemoveIt(filePath+CHUNK+fileIndex,fileIndex,maxLineRead,compareIndex);
+        if(product==null){
+            product=FileUtil.readLineFromAnyFileExceptParamOneAndRemoveIt(filePath+CHUNK,fileIndex,numOfFiles,maxLineRead,compareIndex);
+        }
+        return product;
     }
 
 
@@ -137,17 +144,20 @@ public class ExternalMergeSortService {
 
 
 
+    private void readNextLineComingAfterCurrentOneAndRemoveIt(String filePath, int fileIndex, int numOfFiles, int numberOfLines) throws IOException, InterruptedException {
+        Product product=null;
+        product = FileUtil.readLineAndRemoveIt(filePath+CHUNK+fileIndex,fileIndex,maxLineRead,compareIndex);
+        if(product==null) {
+            product = FileUtil.readLineFromAnyFileExceptParamOneAndRemoveIt(filePath + CHUNK, fileIndex, numOfFiles, maxLineRead, compareIndex);
+        }
+        if(product!=null){
+            List<Product> list = new ArrayList<>();
+            list.add(product);
+            FileUtil.writeAdditionalListToFileAsJsons(filePath + "_cache", list, maxLineRead);
+        }
+    }
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 
 
 
@@ -180,7 +190,7 @@ public class ExternalMergeSortService {
             }
             Collections.sort(listOfLinesfromAllFiles, new Product(compareIndex));
             int indexForFileName=writeFirstAndSmallestLine(bw,listOfLinesfromAllFiles);
-            Boolean isReadLineSucceed = readNextLineComingAfterCurrentOne(listOfBufferedReader,listOfLinesfromAllFiles,indexForFileName);
+            Boolean isReadLineSucceed = OLD_readNextLineComingAfterCurrentOne(listOfBufferedReader,listOfLinesfromAllFiles,indexForFileName);
             if(isReadLineSucceed){
                 continue;
             }
@@ -202,7 +212,7 @@ public class ExternalMergeSortService {
             }
             Collections.sort(listOfLinesfromAllFiles, new Product(compareIndex));
             int indexForFileName=writeFirstAndSmallestLine(bw,listOfLinesfromAllFiles);
-            Boolean isReadLineSucceed = readNextLineComingAfterCurrentOne(listOfBufferedReader,listOfLinesfromAllFiles,indexForFileName);
+            Boolean isReadLineSucceed = OLD_readNextLineComingAfterCurrentOne(listOfBufferedReader,listOfLinesfromAllFiles,indexForFileName);
             if(isReadLineSucceed){
                 continue;
             }
@@ -212,7 +222,7 @@ public class ExternalMergeSortService {
     }
 
 
-    private Boolean readNextLineComingAfterCurrentOne(List<BufferedReader> listOfBufferedReader
+    private Boolean OLD_readNextLineComingAfterCurrentOne(List<BufferedReader> listOfBufferedReader
             , List<Product> listOfLinesfromAllFiles, int indexForFileName) throws IOException {
         String line = listOfBufferedReader.get(indexForFileName).readLine();
         if (line != null) {
