@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.Comparator;
-
-
-
+import java.util.Locale;
 
 
 @Data
@@ -188,7 +186,7 @@ public class Product  implements Comparator<Product> {
         if (this.getClass() != other.getClass())
             return false;
         Product otherMyClass = (Product) other;
-        return otherMyClass.line.equals(this.line);
+        return otherMyClass.line.toLowerCase(Locale.ROOT).equals(this.line.toLowerCase(Locale.ROOT));
     }
 
 

@@ -3,16 +3,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.veeva.csvparallel.dao.Product;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileDeleteStrategy;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -94,7 +90,7 @@ public class FileUtil {
     public FileUtil() {
     }
 
-    public static Product fetchSmallestLineAndRemoveIt(int numberOfLines, int maxLineRead, String filePath, int compareIndex) throws IOException, InterruptedException {
+    public static Product fetchFirstLineAndMoveTheRestToCacheFile(int numberOfLines, int maxLineRead, String filePath, int compareIndex) throws IOException, InterruptedException {
         String FILE_INDEX_FREFIX="_chunk_";
         String CHUNK_FILE_PATH=filePath+"_chunk_";
         String CACHE_FILE_PATH=filePath+"_cache";
@@ -104,7 +100,7 @@ public class FileUtil {
         Product smallestProduct=null;
         while(true) {
             List<BufferedReader> brList = FileUtil.generateBufferReaderList(filePath,FILE_INDEX_FREFIX,fileStartIndex,fileStartIndex.get()+chunkNumber,fileNumber);
-            List<Product> productList= FileUtil.readFirstLineFromEachFileAndRemoveIt(brList,compareIndex,maxLineRead,CHUNK_FILE_PATH);
+            List<Product> productList= FileUtil.readFirstLineFromEachFileAndRemoveIt(brList,compareIndex,maxLineRead,CHUNK_FILE_PATH,fileStartIndex.get()-maxLineRead);
             if(productList.isEmpty()){
                 removeLineFromFile(filePath+"_chunk_"+smallestProduct.getIndexForFileName(),maxLineRead,smallestProduct.getLine());
                 brList.stream().forEach(c-> {try {c.close();} catch (IOException e) {}});
@@ -112,14 +108,16 @@ public class FileUtil {
             }
             Collections.sort(productList, new Product(compareIndex));
             writeAdditionalListToFileAsJsons(CACHE_FILE_PATH,productList,maxLineRead);
-            Product smallestCacheProduct= FileUtil.fetchSmallestLineFromCacheFile(CACHE_FILE_PATH,maxLineRead,compareIndex);
-            smallestProduct=compareSmallestProductVsSmallestProductFromCache(smallestProduct,smallestCacheProduct,CACHE_FILE_PATH,maxLineRead,compareIndex);
+            Product smallestCacheProduct= FileUtil.fetchSmallestLineFromCacheFileAndRemoveIt(CACHE_FILE_PATH,maxLineRead,compareIndex,smallestProduct);
+            smallestProduct= findSmallestAndIfComesFromCacheFileThenRemoveItFromIt(smallestProduct,smallestCacheProduct,CACHE_FILE_PATH,maxLineRead,compareIndex);
         }
 
     }
 
 
-    private static Product compareSmallestProductVsSmallestProductFromCache(Product smallestProduct, Product smallestCacheProduct, String cacheFilePath, int maxLineRead, int compareIndex) throws IOException {
+
+
+    private static Product findSmallestAndIfComesFromCacheFileThenRemoveItFromIt(Product smallestProduct, Product smallestCacheProduct, String cacheFilePath, int maxLineRead, int compareIndex) throws IOException {
         if(smallestProduct==null || smallestProduct.compare(smallestProduct,smallestCacheProduct)>0){
             smallestProduct=smallestCacheProduct;
             removeJsonItemFromFile(cacheFilePath,maxLineRead,smallestCacheProduct);
@@ -188,7 +186,7 @@ public class FileUtil {
         for(int i=0;i<linesNumber;){
             for(int j=0;j<maxLineRead && i<linesNumber ;j++,i++){
                 String line=br.readLine();
-                if(line!=null && !line.isEmpty() && targetLine.equals(line)){
+                if(line!=null && !line.isEmpty() && targetLine.toLowerCase(Locale.ROOT).equals(line.toLowerCase(Locale.ROOT))){
                     continue;
                 }
                 bw.append(line+"\n");
@@ -230,15 +228,17 @@ public class FileUtil {
     }
 
 
-    private static List<Product> readFirstLineFromEachFileAndRemoveIt(List<BufferedReader> brList,int compareIndex,int maxLineRead,String filePath) throws IOException, InterruptedException {
+    private static List<Product> readFirstLineFromEachFileAndRemoveIt
+            (List<BufferedReader> brList,int compareIndex,int maxLineRead,String filePath,int fileStartIndex) throws IOException, InterruptedException {
         List<Product> productList=new ArrayList<>();
         String line=null;
         for(int i=0;i<brList.size();i++){
+            int currentFileIndex=fileStartIndex+i;
             line=brList.get(i).readLine();
-            Product product=new Product(line,compareIndex,i);
+            Product product=new Product(line,compareIndex,currentFileIndex);
             productList.add(product);
             brList.get(i).close();
-            removeLineFromFile(filePath+product.getIndexForFileName(),maxLineRead,product.getLine());
+            removeLineFromFile(filePath+currentFileIndex,maxLineRead,product.getLine());
         }
         return productList;
     }
@@ -269,8 +269,8 @@ public class FileUtil {
     }
 
 
-    private static Product fetchSmallestLineFromCacheFile(String cacheFilePath, int maxLineRead,int compareIndex) throws IOException {
-        Product smallestFromCaheFile=null;
+    private static Product fetchSmallestLineFromCacheFileAndRemoveIt(String cacheFilePath, int maxLineRead, int compareIndex, Product smallestProduct) throws IOException {
+        Product smallestFromCacheFile=null;
         if(!FileUtil.isFileExists(cacheFilePath)) return null;
         BufferedReader br=new BufferedReader(new FileReader(cacheFilePath));
         int linesNumber=getNumberOfLinesFromFile(cacheFilePath);
@@ -278,16 +278,16 @@ public class FileUtil {
             for(int j=0;j<maxLineRead && i<linesNumber;j++,i++){
                 String line=br.readLine();
                 Product currentProduct= (Product) stringToObject(line,Product.class);
-                smallestFromCaheFile=(Product) FileUtil.findSmallestItem(smallestFromCaheFile,currentProduct);
+                smallestFromCacheFile=(Product) FileUtil.findSmallestItem(smallestFromCacheFile,currentProduct);
             }
         }
         br.close();
-        return smallestFromCaheFile;
+        //removeJsonItemFromFile(cacheFilePath,maxLineRead,smallestFromCacheFile);
+        return smallestFromCacheFile;
     }
 
 
-
-    private static Comparator findSmallestItem(Comparator first,Comparator second) {
+    private static Product findSmallestItem(Product first,Product second) {
         if(first!=null && first.compare(first,second)<0){
             return first;
         }else if(second==null){
@@ -424,18 +424,16 @@ public class FileUtil {
             try {
                 br=new BufferedReader(new FileReader(currentFilePath));
                 line= br.readLine();
+                br.close();
                 if(line==null){
-                    br.close();
                     continue;
                 }
                 if(line.isEmpty()){
                     i--;
-                    br.close();
                     continue;
                 }
                 removeLineFromFile(currentFilePath,maxLineRead,line);
-                br.close();
-                return new Product(line,compareIndex,fileIndex);
+                return new Product(line,compareIndex,i);
             } catch (IOException | InterruptedException e) {
                 br.close();
                 continue;

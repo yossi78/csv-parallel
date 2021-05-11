@@ -41,6 +41,7 @@ public class ExternalMergeSortService {
         BufferedReader br =new BufferedReader(new FileReader(filePath));
         String columnsLine=br.readLine();
         Integer numberOfLines= FileUtil.getNumberOfLinesFromFile(filePath);
+        Integer numberOfFiles=numberOfLines/maxLineRead;
         IntStream fileIndexStream=IntStream.range(0,numberOfLines/maxLineRead);
         fileIndexStream.parallel().forEach(c->{
             try {
@@ -48,7 +49,7 @@ public class ExternalMergeSortService {
             } catch (IOException | InterruptedException e) {
             }
         });
-        mergeFiles(fileIndex.get(),columnsLine,numberOfLines,filePath);
+        mergeFiles(numberOfFiles,columnsLine,numberOfLines,filePath);
     }
 
 
@@ -92,8 +93,10 @@ public class ExternalMergeSortService {
 
     //  THE METHOD READ LINES FROM ALL CHUNK TEMP FILES AND SORT THEM AND CREATE FINAL CSV FILE
     private void mergeFiles(int numOfFiles, String columnsLine,int numberOfLines,String filePath) throws IOException, InterruptedException {
+
+        List<Product> xxx=new ArrayList<>();
         BufferedWriter bwFinal=new BufferedWriter(new FileWriter(filePath+"_sorted.csv"));
-        Product smallestProduct= FileUtil.fetchSmallestLineAndRemoveIt(numberOfLines,maxLineRead,filePath,compareIndex);
+        Product smallestProduct= FileUtil.fetchFirstLineAndMoveTheRestToCacheFile(numberOfLines,maxLineRead,filePath,compareIndex);
         bwFinal.append(columnsLine);
         bwFinal.append(smallestProduct+"\n");
         while (true){
@@ -103,6 +106,10 @@ public class ExternalMergeSortService {
             if(smallestProduct==null){
                 break;
             }
+            if(xxx.contains(smallestProduct)){
+                System.out.println("");
+            }
+            xxx.add(smallestProduct);
             bwFinal.append(smallestProduct.getLine()+"\n");
         }
         bwFinal.close();
