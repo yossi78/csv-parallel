@@ -41,15 +41,15 @@ public class ExternalMergeSortService {
         BufferedReader br =new BufferedReader(new FileReader(filePath));
         String columnsLine=br.readLine();
         Integer numberOfLines= FileUtil.getNumberOfLinesFromFile(filePath);
+        Integer numberOfFiles=numberOfLines/maxLineRead;
         IntStream fileIndexStream=IntStream.range(0,numberOfLines/maxLineRead);
-//        fileIndexStream.parallel().forEach(c->{
-        fileIndexStream.forEach(c->{
+        fileIndexStream.parallel().forEach(c->{
             try {
                 readChunkOfLineSortAndWriteItToTempFile(br,fileIndex,maxLineRead,compareIndex,filePath);
             } catch (IOException | InterruptedException e) {
             }
         });
-        mergeFiles(fileIndex.get(),columnsLine,numberOfLines,filePath);
+        mergeFiles(numberOfFiles,columnsLine,numberOfLines,filePath);
     }
 
 
@@ -91,34 +91,26 @@ public class ExternalMergeSortService {
 
 
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-
-
-
-
     //  THE METHOD READ LINES FROM ALL CHUNK TEMP FILES AND SORT THEM AND CREATE FINAL CSV FILE
     private void mergeFiles(int numOfFiles, String columnsLine,int numberOfLines,String filePath) throws IOException, InterruptedException {
+
+        List<Product> xxx=new ArrayList<>();
         BufferedWriter bwFinal=new BufferedWriter(new FileWriter(filePath+"_sorted.csv"));
-        Product smallestProduct= FileUtil.fetchSmallestLineAndRemoveIt(numberOfLines,maxLineRead,filePath,compareIndex);
+        Product smallestProduct= FileUtil.fetchFirstLineAndMoveTheRestToCacheFile(numberOfLines,maxLineRead,filePath,compareIndex);
+        bwFinal.append(columnsLine);
         bwFinal.append(smallestProduct+"\n");
         while (true){
             int fileIndex=smallestProduct.getIndexForFileName();
-            readNextLineComingAfterCurrentOneAndRemoveIt(filePath,fileIndex,numOfFiles,numberOfLines);
+            readNextLineComingAfterCurrentOneAndMoveItToCacheFile(filePath,fileIndex,numOfFiles,numberOfLines);
             smallestProduct=FileUtil.readSmallestJsonFromFileAndRemoveIt(filePath+"_cache",maxLineRead);
             if(smallestProduct==null){
                 break;
             }
-            bwFinal.append(smallestProduct+"\n");
+            if(xxx.contains(smallestProduct)){
+                System.out.println("");
+            }
+            xxx.add(smallestProduct);
+            bwFinal.append(smallestProduct.getLine()+"\n");
         }
         bwFinal.close();
     }
@@ -144,8 +136,7 @@ public class ExternalMergeSortService {
 
 
 
-
-    private void readNextLineComingAfterCurrentOneAndRemoveIt(String filePath, int fileIndex, int numOfFiles, int numberOfLines) throws IOException, InterruptedException {
+    private void readNextLineComingAfterCurrentOneAndMoveItToCacheFile(String filePath, int fileIndex, int numOfFiles, int numberOfLines) throws IOException, InterruptedException {
         Product product=null;
         product = FileUtil.readLineAndRemoveIt(filePath+CHUNK+fileIndex,fileIndex,maxLineRead,compareIndex);
         if(product==null) {
