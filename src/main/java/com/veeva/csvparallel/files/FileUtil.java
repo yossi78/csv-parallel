@@ -100,7 +100,8 @@ public class FileUtil {
         Product smallestProduct=null;
         while(true) {
             List<BufferedReader> brList = FileUtil.generateBufferReaderList(filePath,FILE_INDEX_FREFIX,fileStartIndex,fileStartIndex.get()+chunkNumber,fileNumber);
-            List<Product> productList= FileUtil.readFirstLineFromEachFileAndRemoveIt(brList,compareIndex,maxLineRead,CHUNK_FILE_PATH,fileStartIndex.get()-maxLineRead);
+            List<Product> productList= FileUtil.readFirstLineFromEachFileAndRemoveIt(brList,compareIndex,maxLineRead,CHUNK_FILE_PATH,fileStartIndex.get());
+            fileStartIndex.addAndGet(maxLineRead);
             if(productList.isEmpty()){
                 removeLineFromFile(filePath+"_chunk_"+smallestProduct.getIndexForFileName(),maxLineRead,smallestProduct.getLine());
                 brList.stream().forEach(c-> {try {c.close();} catch (IOException e) {}});
@@ -263,7 +264,6 @@ public class FileUtil {
         List<BufferedReader> brList=new ArrayList<>();
         for(int i=fileStartIndex.get();i<endIndex && i<fileNumber;i++){
             BufferedReader bufferedReader=new BufferedReader(new FileReader(filePath+fileIndexPrefix+i));
-            fileStartIndex.addAndGet(1);
             brList.add(bufferedReader);
         }
         return brList;
@@ -283,7 +283,6 @@ public class FileUtil {
             }
         }
         br.close();
-        //removeJsonItemFromFile(cacheFilePath,maxLineRead,smallestFromCacheFile);
         return smallestFromCacheFile;
     }
 
