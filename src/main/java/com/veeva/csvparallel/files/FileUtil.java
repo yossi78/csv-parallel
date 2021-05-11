@@ -115,9 +115,6 @@ public class FileUtil {
 
     }
 
-
-
-
     private static Product findSmallestAndIfComesFromCacheFileThenRemoveItFromIt(Product smallestProduct, Product smallestCacheProduct, String cacheFilePath, int maxLineRead, int compareIndex) throws IOException {
         if(smallestProduct==null || smallestProduct.compare(smallestProduct,smallestCacheProduct)>0){
             smallestProduct=smallestCacheProduct;
